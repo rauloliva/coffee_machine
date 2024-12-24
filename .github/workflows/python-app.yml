@@ -15,7 +15,7 @@ permissions:
 jobs:
 
   run-python:
-    runs-on: ubuntu-lastest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
