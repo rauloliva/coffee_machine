@@ -102,4 +102,5 @@ def main():
             print(f"Here is ${change} in change.")
             print(f"Here is your {user_drink} ☕ Enjoy!")
 
-main()
+if __name__ == '__main__':
+    main()
