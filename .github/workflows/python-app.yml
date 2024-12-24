@@ -5,26 +5,71 @@ name: Python Script
 
 on:
   push:
+    # Runs on every push that happens in either one of the below branches
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+
+  # allows you to run this workflow manually from the Actions tab
+  workflow_dispactch:
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
-
-  run-python:
+  build:
+    #run-python:
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Setup Python 3.13
         uses: actions/setup-python@v3
         with:
           python-version: "3.13"
-
-      - name: Run Python Script
+      
+      - name: Install Python Dependencies
         run: |
-          python main.py
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Flet Build Web
+        run: |
+          echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}, USER: ${GITHUB_REPOSITORY%/*}, PROJECT_BASE_URL: ${GITHUB_REPOSITORY#*/}"
+          flet build web --base-url ${GITHUB_REPOSITORY#*/} --route-url-strategy hash
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: web-build-artifact  # the name of the artifact
+          path: build/web
+
+  deploy: 
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-ppages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Deploy to Github Pages
+        if: github.event_name == 'push'
+        id: deployment
+        uses: actions/deploy-pages@v4.0.5
+        with:
+          artifact_name: web-build-artifact
