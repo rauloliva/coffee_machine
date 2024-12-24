@@ -37,3 +37,18 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+
+  run-python:
+    runs-on: ubuntu-lastes
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.13"
+
+      - name: Run Python Script
+        run: |
+          python main.py
